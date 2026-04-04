@@ -1,0 +1,36 @@
+services:
+  redis:
+    image: "redis:alpine"
+
+  qr-service:
+    build:
+      context: ./qr-service
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - redis
+
+  qr-worker:
+    build:
+      context: ./qr-service
+    command: celery -A app.celery worker --loglevel=info
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - redis
+
+  gateway:
+    build:
+      context: ./gateway
+    environment:
+      - FLASK_ENV=development
+    depends_on:
+      - qr-service
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - gateway
