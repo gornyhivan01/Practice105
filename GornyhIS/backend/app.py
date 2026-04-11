@@ -8,14 +8,25 @@ celery = Celery('tasks', broker=os.getenv('REDIS_URL'), backend=os.getenv('REDIS
 
 @app.route('/api/check', methods=['POST'])
 def check_url():
-    url = request.json.get('url')
-    task = celery.send_task('tasks.check_availability', args=[url])
+    data = request.get_json()
+    if not data or 'url' not in data:
+        return jsonify({"error": "URL is required"}), 400
+    task = celery.send_task('tasks.check_availability', args=[data['url']])
     return jsonify({"task_id": task.id}), 202
 
 @app.route('/api/status/<task_id>', methods=['GET'])
 def get_status(task_id):
     res = celery.AsyncResult(task_id)
-    return jsonify({"status": res.status, "result": res.result})
+    response_data = {"status": res.status}
+
+    if res.ready():
+        result = res.result
+        # Передаём весь результат, включая URL, IP, статус и online
+        response_data["result"] = result
+    else:
+        response_data["result"] = None  # или можно добавить "processing"
+
+    return jsonify(response_data)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

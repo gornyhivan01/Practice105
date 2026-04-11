@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY tasks.py .
+COPY *.py .
 
 # Запуск Celery воркера
 CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
