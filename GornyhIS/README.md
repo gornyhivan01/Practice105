@@ -1,6 +1,7 @@
 
 # 🌐 URL Checker (Microservices Project)
 
+[![CI/CD Pipeline](https://github.com)](https://github.com)
 
 Сервис для проверки доступности веб-сайтов, построенный на микросервисной архитектуре с использованием Docker.
 
